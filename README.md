@@ -37,9 +37,28 @@ Playwright will save the browser session in `six-profile/`. Future scripts reuse
 
 Treat `six-profile/` like a password: it can contain authenticated cookies. Do not commit, upload, copy, or share it. Each person must create their own local profile by logging in with their own account. Do not run two scripts simultaneously with the same profile.
 
+`reference.js` is only a login/profile setup tool. It never clicks `Batal Kirim`, `Ambil`, `Hapus`, or `Kirim`.
+
+## Configure your own account
+
+**Do not copy another person's URLs.** SIX URLs identify both the student context and the study-plan record. Before running either watcher, replace every account-specific URL with one copied from your own logged-in SIX browser session.
+
+1. Open your own Rencana Studi page in SIX and copy its URL into `PLAN_URL`.
+2. Open each target class through your own SIX session and copy its URL into the target's `url`.
+3. Do this separately in both `course-war.js` and `course-war-optimistic.js` if you plan to use both.
+
+For example, these URL parts are personal and must belong to the person running the script:
+
+```text
+/app/mahasiswa:<your-context>+<semester>/registrasi/rencanastudi/<your-student-id>
+/app/mahasiswa:<your-context>+<semester>/registrasI/mk/<your-student-id>/kelas/<class-id>
+```
+
+The values shown in this repository are examples for one account only. Leaving another person's `mahasiswa:...` context or student ID in place can cause SIX to show an unexpected page and the script to fail.
+
 ## Configure a target
 
-Edit `TARGETS` at the top of `course-war.js`. Each target needs the exact SIX class URL and its course code:
+Edit `TARGETS` at the top of `course-war.js`. Each target needs a target URL copied from your own session, its course code, and the expected SIX success text:
 
 ```js
 const TARGETS = [
@@ -67,3 +86,10 @@ The script opens one KRS tab and one tab per target. It polls availability, then
 
 If an action fails after `Batal Kirim`, it attempts to submit the current plan again. Keep the browser open for manual review if it reports that the safety re-submit failed.
 
+## Experimental optimistic mode
+
+`course-war-optimistic.js` is a separate, intentionally unreliable variant. It dispatches `Batal Kirim` and `Ambil` together without waiting for SIX to confirm either action, then dispatches `Kirim` as soon as SIX renders the button. Use it only if you accept that SIX may reject `Ambil`, submit the old KRS, or leave a result requiring manual review.
+
+```bash
+node course-war-optimistic.js
+```

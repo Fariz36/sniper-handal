@@ -85,16 +85,20 @@ let editablePlan = false;
 
 async function getFirstAvailableTarget() {
   const capacities = await Promise.all(TARGETS.map(async (target) => {
-    await target.page.reload({ waitUntil: "domcontentloaded" });
-
-    const capacity = await target.page.locator(".list-group-item.notice").evaluate((element) => {
-      const text = element.innerText;
-      const quota = Number((text.match(/Kuota\s*(\d+)/i) || [])[1]);
-      const applicants = Number((text.match(/Pendaftar\s*(\d+)/i) || [])[1]);
-      const buttonId = element.querySelector('button[type="submit"]')?.id;
-
-      return { quota, applicants, available: quota - applicants, buttonId };
+    const response = await target.page.request.get(target.url, {
+      headers: { "cache-control": "no-cache" },
     });
+
+    if (!response.ok()) {
+      throw new Error(`Could not poll ${target.courseCode}: SIX returned HTTP ${response.status()}.`);
+    }
+
+    const html = await response.text();
+    const quota = Number((html.match(/Kuota\s*<strong>\s*(\d+)/i) || [])[1]);
+    const applicants = Number((html.match(/Pendaftar\s*<strong>\s*(\d+)/i) || [])[1]);
+    const buttonId = (html.match(/id="(form_add:[^"]+)"/i) || [])[1];
+
+    const capacity = { quota, applicants, available: quota - applicants, buttonId };
 
     if (!Number.isFinite(capacity.available) || !capacity.buttonId) {
       throw new Error(`Could not read ${target.courseCode} capacity or its Ambil button.`);

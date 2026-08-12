@@ -58,7 +58,7 @@ The values shown in this repository are examples for one account only. Leaving a
 
 ## Configure a target
 
-Edit `TARGETS` at the top of `course-war.js`. Each target needs a target URL copied from your own session, its course code, and the expected SIX success text:
+Edit `TARGETS` at the top of `course-war.js` or `course-war-optimistic.js`. Each script uses the same target format: a target URL copied from your own session, its course code, and the expected SIX success text.
 
 ```js
 const TARGETS = [
@@ -82,7 +82,7 @@ cd ~/fafo/sniper
 node course-war.js
 ```
 
-The script opens one KRS tab and one tab per target. It polls availability, then executes `Batal Kirim → Ambil → Kirim` for the first available target. It reports timing for each action and stops after successful submission.
+The script opens one KRS tab and one tab per target. It polls each target using the authenticated SIX HTML document request only; it does not reload fonts, CSS, JavaScript, images, or analytics for every poll. When a seat opens, it executes `Batal Kirim → Ambil → Kirim` for the first available target. It reports timing for each action and stops after successful submission.
 
 If an action fails after `Batal Kirim`, it attempts to submit the current plan again. Keep the browser open for manual review if it reports that the safety re-submit failed.
 

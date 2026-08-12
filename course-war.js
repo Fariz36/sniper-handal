@@ -5,6 +5,8 @@ const RETRY_INTERVAL_MS = 1500;
 
 const PLAN_URL =
   "https://six.itb.ac.id/app/mahasiswa:13523069+2026-1/registrasi/rencanastudi/2021049003";
+const STUDENT_ID = new URL(PLAN_URL).pathname.split("/").at(-1);
+const KRS_FORM_ACTION_PART = `/registrasi/rencanastudi/aD/${STUDENT_ID}`;
 const TARGETS = [
   {
     courseCode: "FI3132",
@@ -134,7 +136,7 @@ async function registerTarget(target) {
 }
 
 function getKrsForm(currentPage) {
-  return currentPage.locator('form[action*="/registrasi/rencanastudi/aD/2021049003"]');
+  return currentPage.locator(`form[action*="${KRS_FORM_ACTION_PART}"]`);
 }
 
 async function submitAndWait(currentPage, button) {

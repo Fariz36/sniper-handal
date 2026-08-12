@@ -2,8 +2,11 @@ const { chromium } = require("playwright");
 
 const PROFILE_DIR = "./six-profile";
 const RETRY_INTERVAL_MS = 1500;
+const PIPELINE_DELAY_MS = 100;
 const PLAN_URL =
   "https://six.itb.ac.id/app/mahasiswa:13523069+2026-1/registrasi/rencanastudi/2021049003";
+const STUDENT_ID = new URL(PLAN_URL).pathname.split("/").at(-1);
+const KRS_FORM_ACTION_PART = `/registrasi/rencanastudi/aD/${STUDENT_ID}`;
 const TARGET = {
   label: "FI3132 / class 47112",
   url: "https://six.itb.ac.id/app/mahasiswa:13523069+2026-1/registrasI/mk/2021049003/kelas/47112?fakultas=FMIPA&prodi=102#47112",
@@ -29,7 +32,7 @@ let targetPage;
   console.log("\n==========================================");
   console.log(" SIX COURSE WAR — OPTIMISTIC MODE");
   console.log("==========================================");
-  console.log("Fires Batal Kirim and Ambil without waiting for success alerts.");
+  console.log("Uses 100 ms gaps between Batal Kirim, Ambil, and Kirim.");
   console.log("This may submit the old plan or fail, depending on SIX timing.\n");
 
   while (true) {
@@ -91,13 +94,13 @@ async function firePipeline(buttonId) {
   await addButton.waitFor({ state: "visible", timeout: 10000 });
 
   // Intentionally do not wait for SIX to confirm Batal Kirim before sending Ambil.
-  await Promise.all([
-    withdrawButton.click({ noWaitAfter: true }),
-    addButton.click({ noWaitAfter: true }),
-  ]);
+  await withdrawButton.click({ noWaitAfter: true });
+  await planPage.waitForTimeout(PIPELINE_DELAY_MS);
+  await addButton.click({ noWaitAfter: true });
   console.log(`[${new Date().toLocaleTimeString("id-ID")}] Batal Kirim + Ambil dispatched (+${Date.now() - startedAt} ms).`);
 
   // Kirim cannot be dispatched until SIX renders it after the withdrawal navigation.
+  await planPage.waitForTimeout(PIPELINE_DELAY_MS);
   const submitButton = getKrsForm().getByRole("button", { name: /^Kirim$/i });
   await submitButton.waitFor({ state: "visible", timeout: 15000 });
   await submitButton.click({ noWaitAfter: true });
@@ -105,7 +108,7 @@ async function firePipeline(buttonId) {
 }
 
 function getKrsForm() {
-  return planPage.locator('form[action*="/registrasi/rencanastudi/aD/2021049003"]');
+  return planPage.locator(`form[action*="${KRS_FORM_ACTION_PART}"]`);
 }
 
 function waitForEnter() {

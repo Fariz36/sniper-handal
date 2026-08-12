@@ -54,7 +54,7 @@ For example, these URL parts are personal and must belong to the person running 
 /app/mahasiswa:<your-context>+<semester>/registrasI/mk/<your-student-id>/kelas/<class-id>
 ```
 
-The values shown in this repository are examples for one account only. Leaving another person's `mahasiswa:...` context or student ID in place can cause SIX to show an unexpected page and the script to fail.
+The values shown in this repository are examples for one account only. Leaving another person's `mahasiswa:...` context or student ID in place can cause SIX to show an unexpected page and the script to fail. The `aD/<student-id>` form selector is derived automatically from your `PLAN_URL`; do not edit it separately.
 
 ## Configure a target
 
@@ -88,7 +88,7 @@ If an action fails after `Batal Kirim`, it attempts to submit the current plan a
 
 ## Experimental optimistic mode
 
-`course-war-optimistic.js` is a separate, intentionally unreliable variant. It dispatches `Batal Kirim` and `Ambil` together without waiting for SIX to confirm either action, then dispatches `Kirim` as soon as SIX renders the button. Use it only if you accept that SIX may reject `Ambil`, submit the old KRS, or leave a result requiring manual review.
+`course-war-optimistic.js` is a separate, intentionally unreliable variant. It waits 100 ms between `Batal Kirim`, `Ambil`, and `Kirim`, without waiting for SIX to confirm either action. Use it only if you accept that SIX may reject `Ambil`, submit the old KRS, or leave a result requiring manual review.
 
 ```bash
 node course-war-optimistic.js
